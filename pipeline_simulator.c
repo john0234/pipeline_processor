@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define NUMMEMORY 65536 /* maximum number of data words in memory */
 #define NUMREGS 8 /* number of machine registers */
@@ -12,6 +13,8 @@
 #define HALT 6
 #define NOOP 7
 #define NOOPINSTRUCTION 0x1c00000
+
+
 
 typedef struct IFIDstruct{
 	int instr;
@@ -65,7 +68,6 @@ typedef struct statestruct{
 void printState(stateType *statePtr);
 int signExtend(int num);
 void print_stats(int n_instrs);
-
 int main(int argc, char** argv){
 
 	if(argc <= 2){
@@ -83,8 +85,12 @@ int main(int argc, char** argv){
 				state.reg[i] = 0;
 			}
 			state.pc = 0;
-			state.instructionCount = 0;
+			state.cycles = 0;
 			state.numMemory = 0;
+			state.fetched = 0;
+			state.retired = 0;
+			state.branches = 0;
+			state.mispreds = 0;
 			//read in the file line by line:
 
 			char line[1024];
@@ -111,7 +117,7 @@ int main(int argc, char** argv){
 				int lineCopy = line;
 				printState(&state);
 				state.pc++;
-				if(((lineCopy & opcodeMask) >> 22) == 0){				
+				if(((lineCopy & opcodeMask) >> 22) == 0){
 					int regA=0;
 					int regB=0;
 					int dest=0;
@@ -125,7 +131,7 @@ int main(int argc, char** argv){
 					regA = state.reg[regA];
 					regB = state.reg[regB];
 					state.reg[dest] = regA + regB;
-					state.instructionCount++;
+					state.cycles++;
 				}//ADD
 				else if(((lineCopy&opcodeMask) >> 22) == 1){
 					int regA=0;
@@ -142,7 +148,7 @@ int main(int argc, char** argv){
 					regA = state.reg[regA];
 					regB = state.reg[regB];
 					state.reg[dest] = ~(regA & regB);
-					state.instructionCount++;
+					state.cycles++;
 				}//NAND
 				else if(((lineCopy&opcodeMask) >> 22) == 2){
 					int regA = 0;
@@ -156,7 +162,7 @@ int main(int argc, char** argv){
 					//sign extend here if negative
 					immediate = state.reg[regB] + immediate;
 					state.reg[regA] = state.mem[immediate];
-					state.instructionCount++;
+					state.cycles++;
 				}//LW
 				else if(((lineCopy&opcodeMask) >> 22) == 3){
 					int regA = (lineCopy & regAMask) >> 19;
@@ -166,7 +172,7 @@ int main(int argc, char** argv){
 					immediate = signExtend(immediate);
 					immediate = state.reg[regB] + immediate;
 					state.mem[immediate] = state.reg[regA];
-					state.instructionCount++;
+					state.cycles++;
 
 				}
 				else if(((lineCopy&opcodeMask) >> 22) == 4){
@@ -180,7 +186,6 @@ int main(int argc, char** argv){
 					if(state.reg[regA] == state.reg[regB]){
 						state.pc = state.pc + immediate;
 					}
-					
 
 				}
 
@@ -193,22 +198,22 @@ int main(int argc, char** argv){
 					state.reg[regA] = state.pc + 1;
 					regB = state.reg[regB];
 					state.pc = regB;
-					state.instructionCount++;
+					state.cycles++;
 
 				}	
 				*/
 
 				else if(((lineCopy&opcodeMask) >> 22) == 6){
-					state.instructionCount++;
+					state.cycles++;
 
 					run = 0;
 				}
 				else if(((lineCopy&opcodeMask) >> 22) == 7){
-					state.instructionCount++;
+					state.cycles++;
 				}
 			}
 	
-			print_stats(state.instructionCount);
+			print_stats(state.cycles);
 		}else{
 			//file does not exist
 			fprintf(stderr, "The given file does not exist.\n");
@@ -225,6 +230,9 @@ int main(int argc, char** argv){
 	return 0;
 }
 
+// ************************* OLD PRINT STUFF *******************************
+
+/*
 void printState(stateType *statePtr){
 	int i;
 	printf("\n@@@\nstate:\n");
@@ -249,11 +257,11 @@ int signExtend(int num){
 void print_stats(int n_instrs){
 	printf("INSTRUCTIONS: %d\n", n_instrs); // total executed instructions
 }
-
+*/
 
 //********************* ALL PRINT STUFF HERE ******************************* 
 
-/*
+
 
 int field0(int instruction){
  	return( (instruction>>19) & 0x7);
@@ -335,7 +343,7 @@ void printState(stateType *statePtr){
 	printInstruction(statePtr->EXMEM.instr);
 	printf("\t\tbranchTarget %d\n", statePtr->EXMEM.branchTarget);
 	printf("\t\taluResult %d\n", statePtr->EXMEM.aluResult);
-	printf("\t\treadRegB %d\n", statePtr->EXMEM.readRegB);
+	printf("\t\treadRegB %d\n", statePtr->EXMEM.readReg);
  	printf("\tMEMWB:\n");
 	printf("\t\tinstruction ");
 	printInstruction(statePtr->MEMWB.instr);
@@ -346,5 +354,5 @@ printInstruction(statePtr->WBEND.instr);
 	printf("\t\twriteData %d\n", statePtr->WBEND.writeData);
 }
 
-*/
+
 
