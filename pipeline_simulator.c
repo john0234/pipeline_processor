@@ -350,7 +350,7 @@ void printState(stateType *statePtr){
 	printf("\t\twriteData %d\n", statePtr->MEMWB.writeData);
  	printf("\tWBEND:\n");
 	printf("\t\tinstruction ");
-printInstruction(statePtr->WBEND.instr);
+	printInstruction(statePtr->WBEND.instr);
 	printf("\t\twriteData %d\n", statePtr->WBEND.writeData);
 }
 
