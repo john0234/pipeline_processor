@@ -323,8 +323,9 @@ void MEMstage(stateType* state, stateType* newState)
 }//Mem Stage
 
 
-void WBStage(stateType* state, stateType* newState)
+int WBStage(stateType* state, stateType* newState)
 {
+    int result =1;
     //TODO: deal with writeData hazard
     newState->WBEND.instr = state->MEMWB.instr;
     newState->WBEND.writeData = 0;
@@ -374,16 +375,17 @@ void WBStage(stateType* state, stateType* newState)
     }
     if (opcode(state->MEMWB.instr) == HALT) {
         printf("machine halted\n");
+	result =0;
         //break;
     }
 
-
+  return result;
 }//WB stage
 
 void run(stateType* state, stateType* newState){
-
+	int runner =1;
     // Primary loop
-    while(1){
+    while(runner){
 
         state->cycles++;
 
@@ -405,7 +407,7 @@ void run(stateType* state, stateType* newState){
         MEMstage(state, newState);
         /*------------------WB stage ---------------------*/
 
-        WBStage(state, newState);
+        runner = WBStage(state, newState);
 
         state = newState;
 
