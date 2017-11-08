@@ -251,7 +251,7 @@ void EXstage(stateType* state, stateType* newState)
         // BEQ
     else if(opcode(state->IDEX.instr) == BEQ){
         // Calculate condition
-        newState->EXMEM.aluResult= (state->IDEX.readRegA == state->IDEX.readRegB);
+        newState->EXMEM.aluResult = (state->IDEX.readRegA == state->IDEX.readRegB);
         //branch target
         //Branch target gets set regardless of instruction
         newState->EXMEM.branchTarget = state->IDEX.pcPlus1 + state->IDEX.offset;
@@ -362,18 +362,18 @@ int WBStage(stateType* state, stateType* newState)
             state->pc = state->reg[field1(instr)];
         }*/
         // BEQ
-    else if(opcode(state->MEMWB.instr) == BEQ){
+  /*  else if(opcode(state->MEMWB.instr) == BEQ){
         // Calculate condition
         //aluResult = (regA == regB);
         newState->pc = state->MEMWB.writeData;
 
-        // ZD
+    */    // ZD
         /*if(aluResult){
             // branch
             state->pc = branchTarget;
-        }*/
-    }
-    if (opcode(state->MEMWB.instr) == HALT) {
+        }
+    }*/
+    else if(opcode(state->MEMWB.instr) == HALT) {
         printf("machine halted\n");
 	result =0;
         //break;
