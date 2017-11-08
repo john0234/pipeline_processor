@@ -278,15 +278,13 @@ void MEMstage(stateType* state, stateType* newState)
     if(opcode(state->EXMEM.instr) == ADD){
         // Add
         // Save result
-        //Change the data mem
-        //state->reg[field2(instr)] = aluResult;
+        //Change the data mem    
         newState->MEMWB.writeData = state->EXMEM.aluResult;
     }
         // NAND
     else if(opcode(state->EXMEM.instr) == NAND){
         // NAND
         // Save result
-        //state->reg[field2(instr)] = aluResult;
         newState->MEMWB.writeData = state->EXMEM.aluResult;
 
     }
@@ -295,14 +293,11 @@ void MEMstage(stateType* state, stateType* newState)
         // Calculate memory address
         if(opcode(state->EXMEM.instr) == LW){
             // Load
-            //newState.reg[field0(state.EXMEM.instr)] = state.dataMem[state.EXMEM.readReg];
             newState->MEMWB.writeData = state->dataMem[state->EXMEM.readReg];
 
         }else if(opcode(state->EXMEM.instr) == SW){
             // Store
             newState->dataMem[state->EXMEM.readReg] = state->reg[field1(state->EXMEM.instr)];
-
-            //state->mem[aluResult] = regA;
         }
     }
         /* Not implemented in this simulator
@@ -381,6 +376,21 @@ int WBStage(stateType* state, stateType* newState)
 
   return result;
 }//WB stage
+
+void flush(stateType* state, stateType* newState)
+{
+	//TODO: Add things in Ex, MEM, and WB to handle Noops
+	newState->EXMEM.instr = NOOPINSTRUCTION;
+	newState->EXMEM.branchTarget = NOOPINSTRUCTION;
+	newState->EXMEM.aluResult = NOOPINSTRUCTION;
+	newState->EXMEM.readReg = NOOPINSTRUCTION;
+	
+	newState->MEMWB.instr = NOOPINSTRUCTION;
+	newState->MEMWB.writeData = NOOPINSTRUCTION;
+
+	newState->WBEND.instr=NOOPINSTRUCTION;
+	newState->WBEND.writeData = NOOPINSTRUCTION;
+}//Flush
 
 void run(stateType* state, stateType* newState){
 	int runner =1;
