@@ -185,6 +185,7 @@ void print_stats(int n_instrs){
 
 void IFstage(stateType* state, stateType* newState)
 {
+    newState->fetched++;
     newState->IFID.instr = state->instrMem[state->pc];
     newState->IFID.pcPlus1 = state->pc +1;
 }
@@ -251,17 +252,22 @@ void EXstage(stateType* state, stateType* newState)
         // BEQ
     else if(opcode(state->IDEX.instr) == BEQ){
         // Calculate condition
-        newState->EXMEM.aluResult = (state->IDEX.readRegA == state->IDEX.readRegB);
+        //newState->EXMEM.aluResult = (state->IDEX.readRegA == state->IDEX.readRegB);
         //branch target
         //Branch target gets set regardless of instruction
-        newState->EXMEM.branchTarget = state->IDEX.pcPlus1 + state->IDEX.offset;
+        //newState->EXMEM.branchTarget = state->IDEX.pcPlus1 + state->IDEX.offset;
 
-/*
-			// ZD
-			if(aluResult){
-				// branch
-				state->pc = branchTarget;
-			}*/
+        newState->branches++;
+        // ZD
+        if(state->IDEX.readRegA = state->IDEX.readRegB){
+            // branch
+            newState->mispreds++;
+            newState->EXMEM.branchTarget = state->IDEX.pcPlus1 + state->IDEX.offset;
+            newState->pc = state->IDEX.pcPlus1 + state->IDEX.offset;
+            flush(newState);
+        } else{
+
+        }
     }
 
 }//EX stage
@@ -278,7 +284,7 @@ void MEMstage(stateType* state, stateType* newState)
     if(opcode(state->EXMEM.instr) == ADD){
         // Add
         // Save result
-        //Change the data mem    
+        //Change the data mem
         newState->MEMWB.writeData = state->EXMEM.aluResult;
     }
         // NAND
@@ -309,8 +315,9 @@ void MEMstage(stateType* state, stateType* newState)
             state->pc = state->reg[field1(instr)];
         }*/
         // BEQ
-    else if(opcode(state->EXMEM.instr) == BEQ){
-
+    else if(opcode(state->EXMEM.instr) == BEQ)
+    {
+        //Do we leave this here? We also have it in the EXE stage.
         newState->pc = state->EXMEM.branchTarget;
 
     }
@@ -357,12 +364,12 @@ int WBStage(stateType* state, stateType* newState)
             state->pc = state->reg[field1(instr)];
         }*/
         // BEQ
-  /*  else if(opcode(state->MEMWB.instr) == BEQ){
-        // Calculate condition
-        //aluResult = (regA == regB);
-        newState->pc = state->MEMWB.writeData;
+        /*  else if(opcode(state->MEMWB.instr) == BEQ){
+              // Calculate condition
+              //aluResult = (regA == regB);
+              newState->pc = state->MEMWB.writeData;
 
-    */    // ZD
+          */    // ZD
         /*if(aluResult){
             // branch
             state->pc = branchTarget;
@@ -370,30 +377,29 @@ int WBStage(stateType* state, stateType* newState)
     }*/
     else if(opcode(state->MEMWB.instr) == HALT) {
         printf("machine halted\n");
-	result =0;
+        result =0;
         //break;
     }
-
-  return result;
+    newState->retired++;
+    return result;
 }//WB stage
 
-void flush(stateType* state, stateType* newState)
+void flush(stateType* newState)
 {
-	//TODO: Add things in Ex, MEM, and WB to handle Noops
-	newState->EXMEM.instr = NOOPINSTRUCTION;
-	newState->EXMEM.branchTarget = NOOPINSTRUCTION;
-	newState->EXMEM.aluResult = NOOPINSTRUCTION;
-	newState->EXMEM.readReg = NOOPINSTRUCTION;
-	
-	newState->MEMWB.instr = NOOPINSTRUCTION;
-	newState->MEMWB.writeData = NOOPINSTRUCTION;
+    newState->EXMEM.instr = NOOPINSTRUCTION;
+    newState->EXMEM.branchTarget = NOOPINSTRUCTION;
+    newState->EXMEM.aluResult = NOOPINSTRUCTION;
+    newState->EXMEM.readReg = NOOPINSTRUCTION;
 
-	newState->WBEND.instr=NOOPINSTRUCTION;
-	newState->WBEND.writeData = NOOPINSTRUCTION;
+    newState->MEMWB.instr = NOOPINSTRUCTION;
+    newState->MEMWB.writeData = NOOPINSTRUCTION;
+
+    newState->WBEND.instr=NOOPINSTRUCTION;
+    newState->WBEND.writeData = NOOPINSTRUCTION;
 }//Flush
 
 void run(stateType* state, stateType* newState){
-	int runner =1;
+    int runner =1;
     // Primary loop
     while(runner){
 
