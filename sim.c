@@ -16,6 +16,8 @@
 #define NOOP 7
 #define NOOPINSTRUCTION 0x1c00000
 
+
+
 typedef struct IFIDstruct{
     int instr;
     int pcPlus1;
@@ -64,6 +66,9 @@ typedef struct statestruct{
     int branches; 		/* Total number of branches executed */
     int mispreds; 		/* Number of branch mispredictions*/
 } stateType;
+
+void flush(stateType* newState);
+int signExtend(int num);
 
 int field0(int instruction){
     return( (instruction>>19) & 0x7);
@@ -259,7 +264,7 @@ void EXstage(stateType* state, stateType* newState)
 
         newState->branches++;
         // ZD
-        if(state->IDEX.readRegA = state->IDEX.readRegB){
+        if(state->IDEX.readRegA == state->IDEX.readRegB){
             // branch
             newState->mispreds++;
             flush(newState);
