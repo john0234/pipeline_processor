@@ -284,7 +284,7 @@ void MEMstage(stateType* state, stateType* newState)
      *
     **/
 
-    newState->MEMWB.instr= state->EXMEM.instr;
+    newState->MEMWB.instr = state->EXMEM.instr;
     //ADD
     if(opcode(state->EXMEM.instr) == ADD){
         // Add
@@ -406,7 +406,7 @@ void run(stateType* state, stateType* newState){
 
         runner = WBStage(state, newState);
 
-        state = newState;
+        state = newState;`
 
     } // While
     print_stats(state->cycles);

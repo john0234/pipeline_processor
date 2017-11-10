@@ -1,10 +1,6 @@
-lw 1 0 five
-lw 2 0 zero
-lw 3 0 one
-loop beq 1 2 exit
-add 2 2 3
-beq 0 0 loop
-exit halt
-five .fill 5
-zero .fill 0
-one .fill 1
+lw 1 0 seven
+lw 2 0 two
+add 6 1 2
+halt
+seven .fill 7
+two .fill 2
