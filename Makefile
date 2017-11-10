@@ -1,11 +1,11 @@
 CC=gcc
 
 
-all: assembler.c
-	$(CC) $(CFLAGS) assembler.c -o assembler
+all: sim.c
+	$(CC) $(CFLAGS) sim.c -o sim
 
-assembler: assembler.c
+sim: sim.c
 	$(CC) $(CFLAGS) -c assembler
 
 clean:
-	rm *.o *.out assembler
+	rm *.o *.out sim

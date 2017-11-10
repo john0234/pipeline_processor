@@ -262,9 +262,10 @@ void EXstage(stateType* state, stateType* newState)
         // ZD
         if(state->IDEX.readRegA == state->IDEX.readRegB){
             // branch
+            flush(newState);
             newState->mispreds++;
             newState->EXMEM.branchTarget = state->IDEX.pcPlus1 + state->IDEX.offset;
-            flush(newState);
+            
         } else{
             newState->EXMEM.branchTarget = state->IDEX.pcPlus1;
         }
