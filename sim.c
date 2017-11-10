@@ -257,20 +257,16 @@ void EXstage(stateType* state, stateType* newState)
         // BEQ
     else if(opcode(state->IDEX.instr) == BEQ){
         // Calculate condition
-        //newState->EXMEM.aluResult = (state->IDEX.readRegA == state->IDEX.readRegB);
         //branch target
-        //Branch target gets set regardless of instruction
-        //newState->EXMEM.branchTarget = state->IDEX.pcPlus1 + state->IDEX.offset;
-
         newState->branches++;
         // ZD
         if(state->IDEX.readRegA == state->IDEX.readRegB){
             // branch
             newState->mispreds++;
-            flush(newState);
             newState->EXMEM.branchTarget = state->IDEX.pcPlus1 + state->IDEX.offset;
+            flush(newState);
         } else{
-
+            newState->EXMEM.branchTarget = state->IDEX.pcPlus1;
         }
     }
 
@@ -370,16 +366,10 @@ int WBStage(stateType* state, stateType* newState)
 
 void flush(stateType* newState)
 {
-    newState->EXMEM.instr = NOOPINSTRUCTION;
-    newState->EXMEM.branchTarget = NOOPINSTRUCTION;
-    newState->EXMEM.aluResult = NOOPINSTRUCTION;
-    newState->EXMEM.readReg = NOOPINSTRUCTION;
+    newState->IFID.instr = NOOPINSTRUCTION;
 
-    newState->MEMWB.instr = NOOPINSTRUCTION;
-    newState->MEMWB.writeData = NOOPINSTRUCTION;
+    newState->IDEX.instr = NOOPINSTRUCTION;
 
-    newState->WBEND.instr=NOOPINSTRUCTION;
-    newState->WBEND.writeData = NOOPINSTRUCTION;
 }//Flush
 
 void run(stateType* state, stateType* newState){
