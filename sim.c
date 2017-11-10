@@ -262,9 +262,8 @@ void EXstage(stateType* state, stateType* newState)
         if(state->IDEX.readRegA = state->IDEX.readRegB){
             // branch
             newState->mispreds++;
-            newState->EXMEM.branchTarget = state->IDEX.pcPlus1 + state->IDEX.offset;
-            newState->pc = state->IDEX.pcPlus1 + state->IDEX.offset;
             flush(newState);
+            newState->EXMEM.branchTarget = state->IDEX.pcPlus1 + state->IDEX.offset;
         } else{
 
         }
@@ -355,26 +354,6 @@ int WBStage(stateType* state, stateType* newState)
             //DO NOTHING?!?!
         }
     }
-        /* Not implemented in this simulator
-         JALR
-        else if(opcode(instr) == JALR){
-            // Save pc+1 in regA
-            state->reg[field0(instr)] = state->pc;
-            //Jump to the address in regB;
-            state->pc = state->reg[field1(instr)];
-        }*/
-        // BEQ
-        /*  else if(opcode(state->MEMWB.instr) == BEQ){
-              // Calculate condition
-              //aluResult = (regA == regB);
-              newState->pc = state->MEMWB.writeData;
-
-          */    // ZD
-        /*if(aluResult){
-            // branch
-            state->pc = branchTarget;
-        }
-    }*/
     else if(opcode(state->MEMWB.instr) == HALT) {
         printf("machine halted\n");
         result =0;
