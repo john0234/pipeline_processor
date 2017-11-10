@@ -71,18 +71,22 @@ void flush(stateType* newState);
 int signExtend(int num);
 
 int field0(int instruction){
+    //Reg A
     return( (instruction>>19) & 0x7);
 }
 
 int field1(int instruction){
+    //Reg B
     return( (instruction>>16) & 0x7);
 }
 
 int field2(int instruction){
+    //DEST or Immediate
     return(instruction & 0xFFFF);
 }
 
 int opcode(int instruction){
+    //OPCODE
     return(instruction>>22);
 }
 /*
@@ -224,13 +228,14 @@ void EXstage(stateType* state, stateType* newState)
     **/
     newState->EXMEM.aluResult = 0;
     newState->EXMEM.branchTarget = 0;
-    newState->EXMEM.instr = state->EXMEM.instr;
+    newState->EXMEM.instr = state->IDEX.instr;
     newState->EXMEM.readReg = 0;
 
     // ADD
     if(opcode(state->IDEX.instr) == ADD){
         // Add
         newState->EXMEM.aluResult= state->IDEX.readRegA + state->IDEX.readRegB;
+
 
     }
         // NAND
@@ -262,10 +267,9 @@ void EXstage(stateType* state, stateType* newState)
         // ZD
         if(state->IDEX.readRegA == state->IDEX.readRegB){
             // branch
-            flush(newState);
             newState->mispreds++;
             newState->EXMEM.branchTarget = state->IDEX.pcPlus1 + state->IDEX.offset;
-            
+            flush(newState);
         } else{
             newState->EXMEM.branchTarget = state->IDEX.pcPlus1;
         }
@@ -300,10 +304,12 @@ void MEMstage(stateType* state, stateType* newState)
         // Calculate memory address
         if(opcode(state->EXMEM.instr) == LW){
             // Load
+            printf("In LW");
             newState->MEMWB.writeData = state->dataMem[state->EXMEM.readReg];
 
         }else if(opcode(state->EXMEM.instr) == SW){
             // Store
+            printf("In SW");
             newState->dataMem[state->EXMEM.readReg] = state->reg[field1(state->EXMEM.instr)];
         }
     }
@@ -336,12 +342,12 @@ int WBStage(stateType* state, stateType* newState)
     // ADD
     if(opcode(state->MEMWB.instr) == ADD){
         // Add
-        newState->reg[field0(state->MEMWB.instr)] = state->MEMWB.writeData;
+        newState->reg[field2(state->MEMWB.instr)] = state->MEMWB.writeData;
     }
         // NAND
     else if(opcode(state->MEMWB.instr) == NAND){
         // NAND
-        newState->reg[field0(state->MEMWB.instr)] = state->MEMWB.writeData;
+        newState->reg[field2(state->MEMWB.instr)] = state->MEMWB.writeData;
     }
         // LW or SW
     else if(opcode(state->MEMWB.instr) == LW || opcode(state->MEMWB.instr) == SW){
@@ -349,7 +355,7 @@ int WBStage(stateType* state, stateType* newState)
         if(opcode(state->MEMWB.instr) == LW){
             // Load
             //state->reg[field0(instr)] = state->mem[aluResult];
-            newState->reg[field0(state->MEMWB.instr)] = state->MEMWB.writeData;
+            newState->reg[field2(state->MEMWB.instr)] = state->MEMWB.writeData;
         }else if(opcode(state->MEMWB.instr) == SW){
             // Store
             //newState->dataMem[state->MEMWB.writeData] = state->MEMWB.writeData;
@@ -376,7 +382,7 @@ void flush(stateType* newState)
 void run(stateType* state, stateType* newState){
     int runner =1;
     // Primary loop
-    while(runner){
+    while(1){
 
         state->cycles++;
 
