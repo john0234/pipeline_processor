@@ -16,6 +16,8 @@
 #define NOOP 7
 #define NOOPINSTRUCTION 0x1c00000
 
+int signExtend(int num);
+
 typedef struct IFIDstruct{
     int instr;
     int pcPlus1;
@@ -199,7 +201,7 @@ void IDstage(stateType* state, stateType* newState)
 
     // Set reg A and B
     newState->IDEX.readRegA = state->reg[field0(state->IFID.instr)];
-    newState->IDEX.readRegA = state->reg[field1(state->IFID.instr)];
+    newState->IDEX.readRegB = state->reg[field1(state->IFID.instr)];
 
     // Set sign extended offset
     newState->IDEX.offset = signExtend(field2(state->IFID.instr));
@@ -219,6 +221,7 @@ void EXstage(stateType* state, stateType* newState)
     newState->EXMEM.aluResult = 0;
     newState->EXMEM.branchTarget = 0;
     newState->EXMEM.instr = state->EXMEM.instr;
+    //this could cause issues since it is default to 0
     newState->EXMEM.readReg = 0;
 
     // ADD
@@ -249,7 +252,7 @@ void EXstage(stateType* state, stateType* newState)
         }*/
 
         // BEQ
-    else if(opcode(state->IDEX.instr) == BEQ){
+    /*else if(opcode(state->IDEX.instr) == BEQ){
         // Calculate condition
         newState->EXMEM.aluResult= (state->IDEX.readRegA == state->IDEX.readRegB);
         //branch target
@@ -262,7 +265,7 @@ void EXstage(stateType* state, stateType* newState)
 				// branch
 				state->pc = branchTarget;
 			}*/
-    }
+    //}//BEQ
 
 }//EX stage
 
@@ -275,6 +278,8 @@ void MEMstage(stateType* state, stateType* newState)
 
     newState->MEMWB.instr= state->EXMEM.instr;
     //ADD
+
+    //Could combine add and nand into one function here
     if(opcode(state->EXMEM.instr) == ADD){
         // Add
         // Save result
@@ -302,7 +307,8 @@ void MEMstage(stateType* state, stateType* newState)
             // Store
             newState->dataMem[state->EXMEM.readReg] = state->reg[field1(state->EXMEM.instr)];
 
-            //state->mem[aluResult] = regA;
+            //might be able to do this to keep it uniform
+            //newState->MEMWB.writeData = state->reg[field1(state->EXMEM.instr)];
         }
     }
         /* Not implemented in this simulator
@@ -314,23 +320,25 @@ void MEMstage(stateType* state, stateType* newState)
             state->pc = state->reg[field1(instr)];
         }*/
         // BEQ
-    else if(opcode(state->EXMEM.instr) == BEQ){
+    /*else if(opcode(state->EXMEM.instr) == BEQ){
 
         newState->pc = state->EXMEM.branchTarget;
 
-    }
+    }*/
 
 }//Mem Stage
 
 
 int WBStage(stateType* state, stateType* newState)
 {
-    int result =1;
+    int result = 1;
     //TODO: deal with writeData hazard
     newState->WBEND.instr = state->MEMWB.instr;
     newState->WBEND.writeData = 0;
 
     // ADD
+
+    //Again, add and nand could be combined
     if(opcode(state->MEMWB.instr) == ADD){
         // Add
         newState->reg[field0(state->MEMWB.instr)] = state->MEMWB.writeData;
@@ -362,7 +370,8 @@ int WBStage(stateType* state, stateType* newState)
             state->pc = state->reg[field1(instr)];
         }*/
         // BEQ
-    else if(opcode(state->MEMWB.instr) == BEQ){
+
+   /* else if(opcode(state->MEMWB.instr) == BEQ){
         // Calculate condition
         //aluResult = (regA == regB);
         newState->pc = state->MEMWB.writeData;
@@ -371,11 +380,11 @@ int WBStage(stateType* state, stateType* newState)
         /*if(aluResult){
             // branch
             state->pc = branchTarget;
-        }*/
-    }
+        }
+    }*/
     if (opcode(state->MEMWB.instr) == HALT) {
         printf("machine halted\n");
-	result =0;
+	result = 0;
         //break;
     }
 
