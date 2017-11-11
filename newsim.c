@@ -168,7 +168,7 @@ void printState(stateType *statePtr){
     printInstruction(statePtr->EXMEM.instr);
     printf("\t\tbranchTarget %d\n", statePtr->EXMEM.branchTarget);
     printf("\t\taluResult %d\n", statePtr->EXMEM.aluResult);
-    printf("\t\treadRegB %d\n", statePtr->EXMEM.readReg);
+    printf("\t\treadReg %d\n", statePtr->EXMEM.readReg);
     printf("\tMEMWB:\n");
     printf("\t\tinstruction ");
     printInstruction(statePtr->MEMWB.instr);
@@ -196,6 +196,7 @@ void IFstage(stateType* state, stateType* newState)
     newState->fetched++;
     newState->IFID.instr = state->instrMem[state->pc];
     newState->IFID.pcPlus1 = state->pc + 1;
+    newState->pc = state->pc+1;
 }
 
 void IDstage(stateType* state, stateType* newState)
@@ -205,7 +206,7 @@ void IDstage(stateType* state, stateType* newState)
     //gets regA & regB from instruction
     newState->IDEX.readRegA = state->reg[field0(state->IFID.instr)];
     newState->IDEX.readRegB = state->reg[field1(state->IFID.instr)];
-    newState->IDEX.offset = state->reg[field2(state->IFID.instr)];
+    newState->IDEX.offset = field2(state->IFID.instr);
 
 }//ID stage
 
@@ -222,6 +223,7 @@ void EXstage(stateType* state, stateType* newState)
     newState->EXMEM.readReg = 0;
 
     // ADD
+	printf("\nThis is OPCODE in EX Stage : %i\n",opcode(newState->IDEX.instr));
     if(opcode(state->IDEX.instr) == ADD){
         // Add
         newState->EXMEM.aluResult= state->IDEX.readRegA + state->IDEX.readRegB;
@@ -238,6 +240,8 @@ void EXstage(stateType* state, stateType* newState)
     else if(opcode(state->IDEX.instr) == LW || opcode(state->IDEX.instr) == SW){
         // Calculate memory address
         newState->EXMEM.readReg = state->IDEX.readRegB + state->IDEX.offset;
+
+	printf("this is LW READREG: %i",newState->EXMEM.readReg);
     }
 
         /* Not implemented in this simulator
@@ -344,7 +348,7 @@ int WBStage(stateType* state, stateType* newState)
         if(opcode(state->MEMWB.instr) == LW){
             // Load
             //state->reg[field0(instr)] = state->mem[aluResult];
-            newState->reg[field2(state->MEMWB.instr)] = state->MEMWB.writeData;
+            newState->reg[field0(state->MEMWB.instr)] = state->MEMWB.writeData;
         }else if(opcode(state->MEMWB.instr) == SW){
             // Store
             //newState->dataMem[state->MEMWB.writeData] = state->MEMWB.writeData;
@@ -369,45 +373,44 @@ void flush(stateType* newState)
 }//Flush
 
 
-void run(stateType* state, stateType newState){
+int run(stateType* state, stateType* newState){
     int runner = 1;
 
-
+	int counter = 0;
 	// Primary loop
 	while(runner){
+	counter++;
 
+	if(counter == 5){
+		return 1;
+	}
 		state->cycles++;
 		printState(state);
 
         /*------------------IF stage ---------------------*/
 
         IFstage(state, newState);
-        if(state->cycles < 1){
-            continue;
-        }
 
         /*------------------ID stage ---------------------*/
 
         IDstage(state, newState);
-        if(state->cycles < 2){
-            continue;
-        }
+
         /*------------------EX stage ---------------------*/
 
         EXstage(state, newState);
-        if(state->cycles < 3){
-            continue;
-        }
+
         /*------------------MEM stage --------------------*/
 
         MEMstage(state, newState);
-        if(state->cycles < 4){
-            continue;
-        }
-        /*------------------WB stage ---------------------*/
+
+	/*------------------WB stage ---------------------*/
 
         //Does this even work?
-        runner = WBStage(state, newState);
+        int blah = WBStage(state, newState);
+//	printf("State: \n");
+//	printf("New State:\n");
+//	printState(newState);
+//	printf("\n*******************************************************\n");
 
         state = newState;
     }	//while
@@ -486,6 +489,8 @@ int main(int argc, char** argv){
 
 	/** Run the simulation **/
 	run(state, newState);
+	//int instruction = 8912909;
+	//printf("this is regA regB offset: %i, %i, %i\n", field0(instruction),field1(instruction),field2(instruction));
 
 	free(state);
     free(newState);

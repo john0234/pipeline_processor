@@ -292,7 +292,7 @@ void MEMstage(stateType* state, stateType* newState)
         // NAND
         // Save result
         //state->reg[field2(instr)] = aluResult;
-        newState->MEMWB.writeData = state->EXMEM.aluResult;
+         newState->MEMWB.writeData = state->EXMEM.aluResult;
 
     }
         // LW or SW
@@ -355,6 +355,7 @@ int WBStage(stateType* state, stateType* newState)
             // Load
             //state->reg[field0(instr)] = state->mem[aluResult];
             newState->reg[field0(state->MEMWB.instr)] = state->MEMWB.writeData;
+	    printf("LW WB Val IS : %i",state->MEMWB.writeData);
         }else if(opcode(state->MEMWB.instr) == SW){
             // Store
             //newState->dataMem[state->MEMWB.writeData] = state->MEMWB.writeData;
