@@ -3,13 +3,12 @@ lw 2 0 two
 lw 3 0 three
 lw 4 0 four
 lw 5 0 six
+noop
+noop
+noop
+noop
 add 6 1 3
 add 7 1 4
-add 6 2 3
-add 7 4 5
-add 6 2 5
-add 7 3 5
-add 7 6 7
 halt
 seven .fill 7
 two .fill 2
