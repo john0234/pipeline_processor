@@ -197,13 +197,10 @@ void print_stats(int n_instrs){
 }
 
 void IFstage(stateType* state, stateType* newState) {
-    printf("State %d\n", state->pc);
     newState->fetched++;
     newState->IFID.instr = state->instrMem[state->pc];
     newState->pc = state->pc +1;
     newState->IFID.pcPlus1 = state->pc +1;
-    printf("State Again %d\n", state->pc);
-    printf("New State %d\n", newState->pc);
 }
 
 
@@ -214,6 +211,7 @@ void IDstage(stateType* state, stateType* newState)
     //gets regA & regB from instruction
     newState->IDEX.readRegA = state->reg[field0(state->IFID.instr)];
     newState->IDEX.readRegB = state->reg[field1(state->IFID.instr)];
+    printf("Reg B: %d", state->reg[field1(state->IFID.instr)]);
     newState->IDEX.offset = field2(state->IFID.instr);
 
 }//ID stage
@@ -235,8 +233,8 @@ void EXstage(stateType* state, stateType* newState)
     printf("\nThis is OPCODE in EX Stage : %i\n",opcode(newState->IDEX.instr));
     if(opcode(state->IDEX.instr) == ADD){
         // Add
-        newState->EXMEM.aluResult= state->IDEX.readRegA + state->IDEX.readRegB;
-
+        newState->EXMEM.aluResult = (state->IDEX.readRegA + state->IDEX.readRegB);
+	printf("ALU Result: %d", newState->EXMEM.aluResult);
 
     }
         // NAND
@@ -345,11 +343,13 @@ int WBStage(stateType* state, stateType* newState)
     if(opcode(state->MEMWB.instr) == ADD){
         // Add
         newState->reg[field2(state->MEMWB.instr)] = state->MEMWB.writeData;
+	newState->WBEND.writeData = state->MEMWB.writeData;
     }
         // NAND
     else if(opcode(state->MEMWB.instr) == NAND){
         // NAND
         newState->reg[field2(state->MEMWB.instr)] = state->MEMWB.writeData;
+	newState->WBEND.writeData = state->MEMWB.writeData;
     }
         // LW or SW
     else if(opcode(state->MEMWB.instr) == LW || opcode(state->MEMWB.instr) == SW){
@@ -390,12 +390,12 @@ int run(stateType* state, stateType* newState){
     while(runner){
 
 
-        if(counter == 3){
-            return 1;
-        }
-        counter++;
+     //   if(runner){
+       //     return 1;
+        //}
+       // counter++;
         state->cycles++;
-       // printState(state);
+        printState(state);
 
         /*------------------IF stage ---------------------*/
         IFstage(state, newState);
@@ -414,7 +414,7 @@ int run(stateType* state, stateType* newState){
         /*------------------WB stage ---------------------*/
 
         //Does this even work?
-        int blah = WBStage(state, newState);
+        runner = WBStage(state, newState);
 
 
 //	printf("State: \n");
@@ -422,7 +422,7 @@ int run(stateType* state, stateType* newState){
 //	printState(newState);
 //	printf("\n*******************************************************\n");
 
-        state = newState;
+        *state = *newState;
     }	//while
 
 }//run
