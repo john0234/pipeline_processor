@@ -199,6 +199,7 @@ void print_stats(int n_instrs){
 void IFstage(stateType* state, stateType* newState) {
     newState->fetched++;
     newState->IFID.instr = state->instrMem[state->pc];
+    printInstruction(newState->IFID.instr);
     newState->pc = state->pc +1;
     newState->IFID.pcPlus1 = state->pc +1;
 }
@@ -211,7 +212,7 @@ void IDstage(stateType* state, stateType* newState)
     //gets regA & regB from instruction
     newState->IDEX.readRegA = state->reg[field0(state->IFID.instr)];
     newState->IDEX.readRegB = state->reg[field1(state->IFID.instr)];
-    printf("Reg B: %d", state->reg[field1(state->IFID.instr)]);
+   // printf("Reg B: %d", state->reg[field1(state->IFID.instr)]);
     newState->IDEX.offset = field2(state->IFID.instr);
 
 }//ID stage
@@ -270,6 +271,7 @@ void EXstage(stateType* state, stateType* newState)
             // branch
             newState->mispreds++;
             newState->EXMEM.branchTarget = state->IDEX.pcPlus1 + state->IDEX.offset;
+	    newState->pc = state->IDEX.pcPlus1 + state->IDEX.offset;
             flush(newState);
         } else{
             newState->EXMEM.branchTarget = state->IDEX.pcPlus1;
