@@ -205,34 +205,15 @@ void IFstage(stateType* state, stateType* newState) {
 }
 
 
-void IDstage(stateType* state, stateType* newState) {
-    if (field0(state->IFID.instr) == field2(state->IDEX.instr) ||
-        field1(state->IFID.instr) == field2(state->IDEX.instr))
-    {
-        newState->pc = state->pc;
-        newState->IDEX.instr = NOOPINSTRUCTION;
-        newState->IFID.instr = state->IFID.instr;
-    }
-    else if (field0(state->IFID.instr) == field2(state->EXMEM.instr) ||
-               field1(state->IFID.instr) == field2(state->EXMEM.instr)) {
-
-		if(field0(state->IFID.instr) == field1(state->EXMEM.inst))
-		{
-			newState->IDEX.readRegA = state->EXMEM.aluResult;
-		}
-		else if(field1(state->IFID.instr) == field2(state->EXMEM.instr))
-		{
-			newState->IDEX.readRegB = state->EXMEM.aluResult;
-		}
-       newState->IDEX.pcPlus1 = state->IFID.pcPlus1;
-        newState->IDEX.instr = state->IFID.instr;
-        //gets regA & regB from instruction
-        newState->IDEX.readRegA = state->reg[field0(state->IFID.instr)];
+void IDstage(stateType* state, stateType* newState) 
+{
+     	newState->IDEX.readRegA = state->reg[field0(state->IFID.instr)];
         newState->IDEX.readRegB = state->reg[field1(state->IFID.instr)];
-        // printf("Reg B: %d", state->reg[field1(state->IFID.instr)]);
+        newState->IDEX.instr = state->IFID.instr;
+        newState->IDEX.pcPlus1 = state->IFID.pcPlus1;
         newState->IDEX.offset = field2(state->IFID.instr);
-    }
-    }//ID stage
+	  
+}//ID stage
 
     void EXstage(stateType *state, stateType *newState) {
         /**
