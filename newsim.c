@@ -209,15 +209,22 @@ void IDstage(stateType* state, stateType* newState) {
     if (field0(state->IFID.instr) == field2(state->IDEX.instr) ||
         field1(state->IFID.instr) == field2(state->IDEX.instr))
     {
-        newState->pc = state->pc - 1;
+        newState->pc = state->pc;
         newState->IDEX.instr = NOOPINSTRUCTION;
         newState->IFID.instr = state->IFID.instr;
     }
-    else if (field0(state->IFID.instr) == field0(state->EXMEM.instr) ||
-               field0(state->IFID.instr) == field1(state->EXMEM.instr)) {
+    else if (field0(state->IFID.instr) == field2(state->EXMEM.instr) ||
+               field1(state->IFID.instr) == field2(state->EXMEM.instr)) {
 
-
-        newState->IDEX.pcPlus1 = state->IFID.pcPlus1;
+		if(field0(state->IFID.instr) == field1(state->EXMEM.inst))
+		{
+			newState->IDEX.readRegA = state->EXMEM.aluResult;
+		}
+		else if(field1(state->IFID.instr) == field2(state->EXMEM.instr))
+		{
+			newState->IDEX.readRegB = state->EXMEM.aluResult;
+		}
+       newState->IDEX.pcPlus1 = state->IFID.pcPlus1;
         newState->IDEX.instr = state->IFID.instr;
         //gets regA & regB from instruction
         newState->IDEX.readRegA = state->reg[field0(state->IFID.instr)];
