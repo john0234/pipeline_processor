@@ -215,7 +215,7 @@ void IDstage(stateType* state, stateType* newState)
 	  
 }//ID stage
 
-    void EXstage(stateType *state, stateType *newState) {
+ void EXstage(stateType *state, stateType *newState) {
         /**
         *
         * Action depends on instruction
@@ -226,14 +226,39 @@ void IDstage(stateType* state, stateType* newState)
         newState->EXMEM.instr = state->IDEX.instr;
         newState->EXMEM.readReg = 0;
 
-
         // ADD
         printf("\nThis is OPCODE in EX Stage : %i\n", opcode(newState->IDEX.instr));
         if (opcode(state->IDEX.instr) == ADD) {
             // Add
+	    if(field0(state->IDEX.instr) == field2(state->EXMEM.instr))
+	    {
+		newState->EXMEM.aluResult = state->EXMEM.aluResult + state->IDEX.readRegB;
+	    }
+	    else if(field1(state->IDEX.instr) == field2(state->EXMEM.instr))
+	    {
+		newState->EXMEM.aluResult = state->IDEX.readRegA + state->EXMEM.aluResult;
+            }
+	    else if(field0(state->IDEX.instr) == field2(state->EXMEM.instr) && field1(state->IDEX.instr)==field2(state->EXMEM.instr))
+	    {
+		newState->EXMEM.aluResult = state->EXMEM.aluResult + state->EXMEM.aluResult;
+ 	    }
+	    else if(field0(state->IDEX.instr)== field(state->MEMWB.instr))
+	    {
+		newState->EXMEM.aluResult == state->MEMWB.writeData + state->IDEX.readRegB;
+	    }
+	    else if(field1(state->IDEX.instr) == field2(state->MEMWB.instr))
+	    {
+		newState->EXMEM.aluResult == state->IDEX.readRegA + state-MEMWB.writeData;
+	    }
+	    else if(field0(state->IDEX.instr)== field2(state->MEMWB.instr) && field1(state->IDEX.instr) == field2(state->EXMEM.instr))
+	    {
+		newState->EXMEM.aluResult == state->MEMWB.writeData + state->MEMWB.writeData;
+	    }
+	    else 
+	    {
             newState->EXMEM.aluResult = (state->IDEX.readRegA + state->IDEX.readRegB);
+	    }
             //printf("ALU Result: %d", newState->EXMEM.aluResult);
-
         }
             // NAND
         else if (opcode(state->IDEX.instr) == NAND) {
