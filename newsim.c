@@ -204,19 +204,19 @@ void IFstage(stateType* state, stateType* newState) {
 
     if(opcode(state->IFID.instr) == LW){
         if(opcode(newState->IFID.instr) == ADD && (field1(newState->IFID.instr) == field0(state->IFID.instr) || field2(newState->IFID.instr) == field0(state->IFID.instr))){
-            newState.pc = state.pc;
+            newState->pc = state->pc;
             newState->IFID.instr = NOOPINSTRUCTION;
         }
         else if(opcode(newState->IFID.instr) == NAND && (field1(newState->IFID.instr) == field0(state->IFID.instr) || field2(newState->IFID.instr) == field0(state->IFID.instr))){
-            newState.pc = state.pc;
+            newState->pc = state->pc;
             newState->IFID.instr = NOOPINSTRUCTION;
         }
         else if(opcode(newState->IFID.instr) == SW && (field0(newState->IFID.instr) == field0(state->IFID.instr))){
-            newState.pc = state.pc;
+            newState->pc = state->pc;
             newState->IFID.instr = NOOPINSTRUCTION;
         }
         else if(opcode(newState->IFID.instr) == BEQ && (field0(newState->IFID.instr) == field0(state->IFID.instr) || field1(newState->IFID.instr) == field0(state->IFID.instr))){
-            newState.pc = state.pc;
+            newState->pc = state->pc;
             newState->IFID.instr = NOOPINSTRUCTION;
         }
     }
@@ -255,85 +255,30 @@ void EXstage(stateType *state, stateType *newState) {
     // ADD
     if (opcode(state->IDEX.instr) == ADD) {
 
-        /*
-        if(field0(state->IDEX.instr) == field2(state->EXMEM.instr))
-        {
-            newState->EXMEM.aluResult = state->EXMEM.aluResult + state->IDEX.readRegB;
-        }
-        else if(field1(state->IDEX.instr) == field2(state->EXMEM.instr))
-        {
-            newState->EXMEM.aluResult = state->IDEX.readRegA + state->EXMEM.aluResult;
-        }
-        else if(field0(state->IDEX.instr) == field2(state->EXMEM.instr) && field1(state->IDEX.instr)==field2(state->EXMEM.instr))
-        {
-            newState->EXMEM.aluResult = state->EXMEM.aluResult + state->EXMEM.aluResult;
-        }
-        else if(field0(state->IDEX.instr)== field2(state->MEMWB.instr))
-        {
-            if(field0(state->IDEX.instr)== field2(state->WBEND.instr))
-            {
-                newState->EXMEM.aluResult = state->WBEND.writeData + state->IDEX.readRegB;
-            }
-            else
-            {
-                newState->EXMEM.aluResult = state->MEMWB.writeData + state->IDEX.readRegB;
-            }
-
-        }
-        else if(field1(state->IDEX.instr) == field2(state->MEMWB.instr))
-        {
-            if(field1(state->IDEX.instr)== field2(state->WBEND.instr))
-            {
-                newState->EXMEM.aluResult = state->IDEX.readRegA + state->WBEND.writeData;
-            }
-            else
-            {
-                newState->EXMEM.aluResult = state->IDEX.readRegA + state->MEMWB.writeData;
-            }
-
-        }
-        else if(field0(state->IDEX.instr)== field2(state->MEMWB.instr) && field1(state->IDEX.instr) == field2(state->MEMWB.instr))
-        {
-            if(field0(state->IDEX.instr)== field2(state->WBEND.instr) && field1(state->IDEX.instr) == field2(state->WBEND.instr))
-            {
-                newState->EXMEM.aluResult = state->WBEND.writeData + state->WBEND.writeData;
-            }
-            else
-            {
-                newState->EXMEM.aluResult = state->MEMWB.writeData + state->MEMWB.writeData;
-            }
-        }
-        else
-        {
-
-        }
-        //printf("ALU Result: %d", newState->EXMEM.aluResult);
-         */
-
         if (field1(state->IDEX.instr) == field0(state->EXMEM.instr) && opcode(state->EXMEM.instr) != BEQ) {
             //if regA is the dest of the Mem, then grab that value instead of going to register.
             regA = state->EXMEM.aluResult;
         }
         if (field2(state->IDEX.instr) == field0(state->EXMEM.instr) &&
-                   opcode(state->EXMEM.instr) != BEQ) {
+            opcode(state->EXMEM.instr) != BEQ) {
             //if regB is the dest of the MEM instruction, grab the correct value.
             regB = state->EXMEM.aluResult;
 
         }
         if (field1(state->IDEX.instr) == field0(state->MEMWB.instr) &&
-                   opcode(state->MEMWB.instr) != BEQ) {
+            opcode(state->MEMWB.instr) != BEQ) {
             regA = state->MEMWB.writeData;
         }
         if (field2(state->IDEX.instr) == field0(state->MEMWB.instr) &&
-                   opcode(state->MEMWB.instr) != BEQ) {
+            opcode(state->MEMWB.instr) != BEQ) {
             regB = state->MEMWB.writeData;
         }
         if (field1(state->IDEX.instr) == field0(state->WBEND.instr) &&
-                   opcode(state->WBEND.instr) != BEQ){
+            opcode(state->WBEND.instr) != BEQ){
             regA = state->WBEND.writeData;
         }
         if (field2(state->IDEX.instr) == field0(state->WBEND.instr) &&
-                   opcode(state->WBEND.instr) != BEQ) {
+            opcode(state->WBEND.instr) != BEQ) {
             regB = state->WBEND.writeData;
         } else {
             //do what we would normally do
@@ -342,86 +287,30 @@ void EXstage(stateType *state, stateType *newState) {
     }
 
     else if (opcode(state->IDEX.instr) == NAND) {
-        // NAND
-        //int regA = state->IDEX.readRegA;
-        //int regB = state->IDEX.readRegB;
-        /*
-        if(field0(state->IDEX.instr) == field2(state->EXMEM.instr))
-        {
-            newState->EXMEM.aluResult = ~(state->EXMEM.aluResult & state->IDEX.readRegB);
-        }
-        else if(field1(state->IDEX.instr) == field2(state->EXMEM.instr))
-        {
-            newState->EXMEM.aluResult = ~(state->IDEX.readRegA & state->EXMEM.aluResult);
-        }
-        else if(field0(state->IDEX.instr) == field2(state->EXMEM.instr) && field1(state->IDEX.instr)==field2(state->EXMEM.instr))
-        {
-            newState->EXMEM.aluResult = ~(state->EXMEM.aluResult & state->EXMEM.aluResult);
-        }
-        else if(field0(state->IDEX.instr)== field2(state->MEMWB.instr))
-        {
-            if(field0(state->IDEX.instr)== field2(state->WBEND.instr))
-            {
-                newState->EXMEM.aluResult = ~(state->WBEND.writeData & state->IDEX.readRegB);
-            }
-            else
-            {
-                newState->EXMEM.aluResult = ~(state->MEMWB.writeData & state->IDEX.readRegB);
-            }
 
-        }
-        else if(field1(state->IDEX.instr) == field2(state->MEMWB.instr))
-        {
-            if(field1(state->IDEX.instr)== field2(state->WBEND.instr))
-            {
-                newState->EXMEM.aluResult = ~(state->IDEX.readRegA & state->WBEND.writeData);
-            }
-            else
-            {
-                newState->EXMEM.aluResult = ~(state->IDEX.readRegA & state->MEMWB.writeData);
-            }
-
-        }
-        else if(field0(state->IDEX.instr)== field2(state->MEMWB.instr) && field1(state->IDEX.instr) == field2(state->MEMWB.instr))
-        {
-            if(field0(state->IDEX.instr)== field2(state->WBEND.instr) && field1(state->IDEX.instr) == field2(state->WBEND.instr))
-            {
-                newState->EXMEM.aluResult = ~(state->WBEND.writeData & state->WBEND.writeData);
-            }
-            else
-            {
-                newState->EXMEM.aluResult = ~(state->MEMWB.writeData & state->MEMWB.writeData);
-            }
-        }
-        else
-        {
-            newState->EXMEM.aluResult = ~(state->IDEX.readRegA & state->IDEX.readRegB);
-        }
-        newState->EXMEM.aluResult = ~(state->IDEX.readRegA & state->IDEX.readRegB);
-         */
         if (field1(state->IDEX.instr) == field0(state->EXMEM.instr) && opcode(state->EXMEM.instr) != BEQ) {
             //if regA is the dest of the Mem, then grab that value instead of going to register.
             regA = state->EXMEM.aluResult;
         }
         if (field2(state->IDEX.instr) == field0(state->EXMEM.instr) &&
-                   opcode(state->EXMEM.instr) != BEQ) {
+            opcode(state->EXMEM.instr) != BEQ) {
             //if regB is the dest of the MEM instruction, grab the correct value.
             regB = state->EXMEM.aluResult;
         }
         if (field1(state->IDEX.instr) == field0(state->MEMWB.instr) &&
-                   opcode(state->MEMWB.instr) != BEQ) {
+            opcode(state->MEMWB.instr) != BEQ) {
             regA = state->MEMWB.writeData;
         }
         if (field2(state->IDEX.instr) == field0(state->MEMWB.instr) &&
-                   opcode(state->MEMWB.instr) != BEQ) {
+            opcode(state->MEMWB.instr) != BEQ) {
             regB = state->MEMWB.writeData;
         }
         if (field1(state->IDEX.instr) == field0(state->WBEND.instr) &&
-                   opcode(state->WBEND.instr) != BEQ) {
+            opcode(state->WBEND.instr) != BEQ) {
             regA = state->WBEND.writeData;
         }
         if (field2(state->IDEX.instr) == field0(state->WBEND.instr) &&
-                   opcode(state->WBEND.instr) != BEQ) {
+            opcode(state->WBEND.instr) != BEQ) {
             regB = state->WBEND.writeData;
         } else {
             //do what we would normally do
@@ -461,10 +350,10 @@ void EXstage(stateType *state, stateType *newState) {
         }//Add/Nand MEMWB
         else if(opcode(state->MEMWB.instr) == SW || opcode(state->MEMWB.instr) == LW){
 
-                if(field0(state->IDEX.instr))
-                {
-                    
-                }
+            if(field0(state->IDEX.instr))
+            {
+
+            }
         }//SW/LW MEMWB
         if(opcode(state->WBEND.instr) == ADD || opcode(state->WBEND.instr) == NAND){
 
