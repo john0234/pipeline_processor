@@ -219,17 +219,17 @@ void IFstage(stateType* state, stateType* newState) {
             newState->pc = state->pc;
             newState->IFID.instr = NOOPINSTRUCTION;
         }
-	else{
-		newState->pc = state->pc + 1;
-		newState->IFID.pcPlus1 = state->pc + 1;
-	}
+        else{
+            newState->pc = state->pc + 1;
+            newState->IFID.pcPlus1 = state->pc + 1;
+        }
     }
     else{
         newState->pc = state->pc + 1;
         newState->IFID.pcPlus1 = state->pc + 1;
     }
     if(newState->IFID.instr != 0){
-		newState->fetched++;
+        newState->fetched++;
     }
 }
 
@@ -506,7 +506,7 @@ void flush(stateType *newState) {
 }//Flush
 
 
-int run(stateType *state, stateType *newState) {
+void run(stateType *state, stateType *newState) {
     int runner = 1;
 
     int counter = 0;
