@@ -220,7 +220,7 @@ void IFstage(stateType* state, stateType* newState) {
             newState->IFID.instr = NOOPINSTRUCTION;
         }
     }
-    else if(opcode(newState->IFID.instr) != 0){
+    else if(newState->IFID.instr != 0){
         newState->pc = state->pc + 1;
         newState->IFID.pcPlus1 = state->pc + 1;
         newState->fetched++;
