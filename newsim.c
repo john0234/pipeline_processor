@@ -219,11 +219,17 @@ void IFstage(stateType* state, stateType* newState) {
             newState->pc = state->pc;
             newState->IFID.instr = NOOPINSTRUCTION;
         }
+	else{
+		newState->pc = state->pc + 1;
+		newState->IFID.pcPlus1 = state->pc + 1;
+	}
     }
-    else if(newState->IFID.instr != 0){
+    else{
         newState->pc = state->pc + 1;
         newState->IFID.pcPlus1 = state->pc + 1;
-        newState->fetched++;
+    }
+    if(newState->IFID.instr != 0){
+		newState->fetched++;
     }
 }
 
