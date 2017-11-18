@@ -609,6 +609,11 @@ int main(int argc, char **argv) {
     memset(state->dataMem, 0, NUMMEMORY * sizeof(int));
     memset(state->reg, 0, NUMREGS * sizeof(int));
     state->numMemory = line_count;
+    state->cycles =0;
+    state->fetched=0;
+    state->retired =0;
+    state->branches =0;
+    state->mispreds =0;
 
     //initialize newState
     newState->pc = 0;
@@ -616,6 +621,11 @@ int main(int argc, char **argv) {
     memset(newState->dataMem, 0, NUMMEMORY * sizeof(int));
     memset(newState->reg, 0, NUMREGS * sizeof(int));
     newState->numMemory = line_count;
+    newState->cycles =0;
+    newState->fetched=0;
+    newState->retired =0;
+    newState->branches =0;
+    newState->mispreds =0;
 
     char line[256];
 
