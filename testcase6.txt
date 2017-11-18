@@ -1,0 +1,10 @@
+lw 1 0 zero
+lw 2 0 fifty
+lw 3 0 neg1
+loop beq 2 0 exit
+add 2 2 3
+beq 0 0 loop
+exithalt
+neg1 .fill -1
+fifty .fill fifty
+zero .fill 0
