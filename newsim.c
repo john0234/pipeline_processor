@@ -206,18 +206,22 @@ void IFstage(stateType* state, stateType* newState) {
         if(opcode(newState->IFID.instr) == ADD && (field1(newState->IFID.instr) == field0(state->IFID.instr) || field2(newState->IFID.instr) == field0(state->IFID.instr))){
             newState->pc = state->pc;
             newState->IFID.instr = NOOPINSTRUCTION;
+            newState->retired--;
         }
         else if(opcode(newState->IFID.instr) == NAND && (field1(newState->IFID.instr) == field0(state->IFID.instr) || field2(newState->IFID.instr) == field0(state->IFID.instr))){
             newState->pc = state->pc;
             newState->IFID.instr = NOOPINSTRUCTION;
+            newState->retired--;
         }
         else if(opcode(newState->IFID.instr) == SW && (field0(newState->IFID.instr) == field0(state->IFID.instr))){
             newState->pc = state->pc;
             newState->IFID.instr = NOOPINSTRUCTION;
+            newState->retired--;
         }
         else if(opcode(newState->IFID.instr) == BEQ && (field0(newState->IFID.instr) == field0(state->IFID.instr) || field1(newState->IFID.instr) == field0(state->IFID.instr))){
             newState->pc = state->pc;
             newState->IFID.instr = NOOPINSTRUCTION;
+            newState->retired--;
         }
         else{
             newState->pc = state->pc + 1;
