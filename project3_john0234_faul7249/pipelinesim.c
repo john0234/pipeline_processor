@@ -65,10 +65,9 @@ typedef struct statestruct{
     int retired; 		/* Total number of completed instructions */
     int branches; 		/* Total number of branches executed */
     int mispreds; 		/* Number of branch mispredictions*/
-    int flushes;        /*Total number of flushes*/
 } stateType;
 
-void flush(stateType* newState);
+void flush(stateType* state, stateType* newState);
 int signExtend(int num);
 void EXstage(stateType* state, stateType* newState);
 void IFstage(stateType* state, stateType* newState);
@@ -91,23 +90,6 @@ int field2(int instruction){
 int opcode(int instruction){
     return(instruction>>22);
 }
-
-/*
-void printState(stateType *statePtr){
-	int i;
-	printf("\n@@@\nstate:\n");
-	printf("\tpc %d\n", statePtr->pc);
-	printf("\tmemory:\n");
-	for(i = 0; i < statePtr->numMemory; i++){
-		printf("\t\tmem[%d]=%d\n", i, statePtr->mem[i]);
-	}
-	printf("\tregisters:\n");
-	for(i = 0; i < NUMREGS; i++){
-		printf("\t\treg[%d]=%d\n", i, statePtr->reg[i]);
-	}
-	printf("end state\n");
-}
-*/
 
 void printInstruction(int instr) {
     char opcodeString[10];
@@ -199,29 +181,29 @@ void print_stats(int n_instrs){
 
 void IFstage(stateType* state, stateType* newState) {
 
-    //printInstruction(newState->IFID.instr);
     newState->IFID.instr = state->instrMem[state->pc];
+    ++newState->retired;
 
     if(opcode(state->IFID.instr) == LW){
         if(opcode(newState->IFID.instr) == ADD && (field1(newState->IFID.instr) == field0(state->IFID.instr) || field2(newState->IFID.instr) == field0(state->IFID.instr))){
             newState->pc = state->pc;
             newState->IFID.instr = NOOPINSTRUCTION;
-            newState->retired--;
+            --newState->retired;
         }
         else if(opcode(newState->IFID.instr) == NAND && (field1(newState->IFID.instr) == field0(state->IFID.instr) || field2(newState->IFID.instr) == field0(state->IFID.instr))){
             newState->pc = state->pc;
             newState->IFID.instr = NOOPINSTRUCTION;
-            newState->retired--;
+            --newState->retired;
         }
         else if(opcode(newState->IFID.instr) == SW && (field0(newState->IFID.instr) == field0(state->IFID.instr))){
             newState->pc = state->pc;
             newState->IFID.instr = NOOPINSTRUCTION;
-            newState->retired--;
+            --newState->retired;
         }
         else if(opcode(newState->IFID.instr) == BEQ && (field0(newState->IFID.instr) == field0(state->IFID.instr) || field1(newState->IFID.instr) == field0(state->IFID.instr))){
             newState->pc = state->pc;
             newState->IFID.instr = NOOPINSTRUCTION;
-            newState->retired--;
+            --newState->retired;
         }
         else{
             newState->pc = state->pc + 1;
@@ -245,26 +227,15 @@ void IDstage(stateType* state, stateType* newState)
     int readRegA = 0;
     int readRegB = 0;
 
-    if(opcode(instr) == ADD || opcode(instr) == NAND){
-        readRegA = field1(instr);
-        readRegB = field2(instr);
-    }
-    else if(opcode(instr) == LW || opcode(instr) == SW || opcode(instr) == BEQ){
-        readRegA = field0(instr);
-        readRegB = field1(instr);
-        offset = signExtend(field2(instr));
-    }
+    readRegA = field0(instr);
+    readRegB = field1(instr);
+    offset = signExtend(field2(instr));
+
     newState->IDEX.readRegA = state->reg[readRegA];
     newState->IDEX.readRegB = state->reg[readRegB];
     newState->IDEX.instr = instr;
     newState->IDEX.pcPlus1 = pcPlus1;
     newState->IDEX.offset = offset;
-
-    /*newState->IDEX.readRegA = state->reg[field0(state->IFID.instr)];
-    newState->IDEX.readRegB = state->reg[field1(state->IFID.instr)];
-    newState->IDEX.instr = state->IFID.instr;
-    newState->IDEX.pcPlus1 = state->IFID.pcPlus1;
-    newState->IDEX.offset = signExtend(field2(state->IFID.instr));*/
 
 }//ID stage
 
@@ -325,7 +296,7 @@ void EXstage(stateType *state, stateType *newState) {
         else if (field1(state->IDEX.instr) == field0(state->MEMWB.instr) &&
             opcode(state->MEMWB.instr) != BEQ) {
             //if regB is the dest of the MEM instruction, grab the correct value.
-            regB = state->MEMWB.writeData;
+            regA = state->MEMWB.writeData;
         }
         else if (field1(state->IDEX.instr) == field0(state->WBEND.instr) &&
             opcode(state->WBEND.instr) != BEQ) {
@@ -337,7 +308,7 @@ void EXstage(stateType *state, stateType *newState) {
         }
         else if (field1(state->IDEX.instr) == field0(state->MEMWB.instr) &&
             opcode(state->MEMWB.instr) != BEQ) {
-            regA = state->MEMWB.writeData;
+            regB = state->MEMWB.writeData;
         }
         else if (field2(state->IDEX.instr) == field0(state->WBEND.instr) &&
             opcode(state->WBEND.instr) != BEQ) {
@@ -418,6 +389,7 @@ void MEMstage(stateType *state, stateType *newState) {
     **/
     //int result = 1;
     newState->MEMWB.instr = state->EXMEM.instr;
+    newState->MEMWB.writeData = 0;
     //ADD
     if (opcode(state->EXMEM.instr) == ADD) {
         // Add
@@ -454,9 +426,12 @@ void MEMstage(stateType *state, stateType *newState) {
        {
            newState->mispreds++;
            newState->pc = state->EXMEM.branchTarget;
-           flush(newState);
+           flush(state, newState);
        }
 
+    }
+    else if(opcode(state->EXMEM.instr) == HALT){
+	newState->retired = state->retired - 2;
     }
 
 }//Mem Stage
@@ -470,13 +445,13 @@ void WBStage(stateType *state, stateType *newState) {
     // ADD
     if (opcode(state->MEMWB.instr) == ADD) {
         // Add
-        newState->reg[field0(state->MEMWB.instr)] = state->MEMWB.writeData;
+        newState->reg[field2(state->MEMWB.instr)] = state->MEMWB.writeData;
         newState->WBEND.writeData = state->MEMWB.writeData;
     }
         // NAND
     else if (opcode(state->MEMWB.instr) == NAND) {
         // NAND
-        newState->reg[field0(state->MEMWB.instr)] = state->MEMWB.writeData;
+        newState->reg[field2(state->MEMWB.instr)] = state->MEMWB.writeData;
         newState->WBEND.writeData = state->MEMWB.writeData;
     }
         // LW or SW
@@ -493,15 +468,15 @@ void WBStage(stateType *state, stateType *newState) {
         result = 0;
         //break;
     }
-    newState->retired++;
+    //newState->retired++;
 }//WB stage
 
-void flush(stateType *newState) {
+void flush(stateType* state, stateType *newState) {
     newState->IFID.instr = NOOPINSTRUCTION;
     newState->EXMEM.instr = NOOPINSTRUCTION;
     newState->IDEX.instr = NOOPINSTRUCTION;
-    newState->flushes += 3;
-    newState->retired -= 3;
+    //newState->flushes += 3;
+    newState->retired = state->retired - 3;
 
 }//Flush
 
@@ -509,7 +484,8 @@ void flush(stateType *newState) {
 void run(stateType *state, stateType *newState)
  {
     // Primary loop
-    newState->retired -= 5;
+    //newState->retired -= 5;
+
     while (1) {
 
         printState(state);
@@ -520,13 +496,11 @@ void run(stateType *state, stateType *newState)
         printf("machine halted\n");
         printf("total of %d cycles executed\n", state->cycles);
         printf("total of %d instructions fetched\n", state->fetched);
-        printf("total of %d instructions retured\n", state->retired);
+        printf("total of %d instructions retired\n", state->retired);
         printf("total of %d branches executed\n", state->branches);
         printf("total of %d branch mispredictions\n", state->mispreds);
         exit(0);
     }
-
-
 
     *newState = *state;
     newState->cycles++;
@@ -550,12 +524,6 @@ void run(stateType *state, stateType *newState)
 
         //Does this even work?
         WBStage(state, newState);
-
-
-//	printf("State: \n");
-//	printf("New State:\n");
-//	printState(newState);
-//	printf("\n*******************************************************\n");
 
         *state = *newState;
     }    //while
@@ -648,8 +616,6 @@ int main(int argc, char **argv) {
 
     /** Run the simulation **/
     run(state, newState);
-    //int instruction = 8912909;
-    //printf("this is regA regB offset: %i, %i, %i\n", field0(instruction),field1(instruction),field2(instruction));
 
     free(state);
     free(newState);

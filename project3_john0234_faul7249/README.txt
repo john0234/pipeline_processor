@@ -22,8 +22,9 @@ testcase3: This is a test case that has no hazards. This is done by loading in f
 
 testcase4: This is a test case that deals with the beq hazard and flushing. It will load in four values. It will then check to see if registers 1 and 2 are equal (o and 10) since they are not it will increment registers 2 by one and increment register 4 by itself and then continue to loop until registers 1 equals 10 and then halt. 
 
-testcase5: This is a test case that will again deal with the beq/flushing hazards. It will load in 3 values, 1, 100, and 0. It will then check to see if registers 2 and 3 are equal (100 and 0) If it is not it will increment registers 3. This loop will continue and should run 100 times until registers 3 equals 100 and then it should halt. 
+testcase5: This is a test case that deals with data forwarding. It will load in five values. It will then add registers together and then store the registers that we added into memory. The results of the test case are: reg6 = 5 + 6, reg7 = 11 + 4, reg6 = 11 + 11, reg7 = 15 + 15,  
+
 
 testcase6: This is a test case again deals with the beq/flusing hazard. It will load in three values and then check to see if registers 2 is equal to register 0. It will then decement the value of registers 2. This will continue, and run 50 times until register 2 euqals 0. 
 
-testcase7: This is a test case that was given to us by Dr. Myre. It has a load word that takes ina value from a .fill and then halts.     
+testcase7: This is a test case that was given to us by Dr. Myre. It has a load word that takes in a value from a .fill and then halts.     
