@@ -1,0 +1,13 @@
+lw 1 0 ten
+lw 2 0 zero
+lw 3 0 one
+lw 4 0 two
+loop beq 2 1 exit
+add 2 2 3
+add 4 4 4
+beq 0 0 loop
+exit halt
+ten .fill 10
+zero .fill 0
+one .fill 1
+two .fill 2

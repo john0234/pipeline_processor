@@ -1,0 +1,19 @@
+lw 1 0 two
+lw 2 0 four
+lw 3 0 seven
+lw 4 0 twel
+lw 5 0 fift
+noop 
+noop 
+noop
+noop
+noop
+add 6 1 2
+add 7 3 4
+add 8 5 1
+halt
+two .fill 2
+four .fill 4
+seven .fill 7
+twel .fill 12
+fift .fill 15
