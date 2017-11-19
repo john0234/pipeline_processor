@@ -462,6 +462,7 @@ void MEMstage(stateType *state, stateType *newState) {
 }//Mem Stage
 
 void WBStage(stateType *state, stateType *newState) {
+    int result = 1;
     //TODO: deal with writeData hazard
     newState->WBEND.instr = state->MEMWB.instr;
     newState->WBEND.writeData = 0;
@@ -487,6 +488,11 @@ void WBStage(stateType *state, stateType *newState) {
             newState->WBEND.writeData = state->MEMWB.writeData;
 
     }
+    else if (opcode(state->MEMWB.instr) == HALT) {
+        printf("machine halted\n");
+        result = 0;
+        //break;
+    }
     newState->retired++;
 }//WB stage
 
@@ -500,9 +506,10 @@ void flush(stateType *newState) {
 }//Flush
 
 
-void run(stateType *state, stateType *newState) {
-
+void run(stateType *state, stateType *newState)
+ {
     // Primary loop
+    newState->retired -= 5;
     while (1) {
 
         printState(state);
@@ -513,7 +520,7 @@ void run(stateType *state, stateType *newState) {
         printf("machine halted\n");
         printf("total of %d cycles executed\n", state->cycles);
         printf("total of %d instructions fetched\n", state->fetched);
-        printf("total of %d instructions retired\n", state->retired);
+        printf("total of %d instructions retured\n", state->retired);
         printf("total of %d branches executed\n", state->branches);
         printf("total of %d branch mispredictions\n", state->mispreds);
         exit(0);
