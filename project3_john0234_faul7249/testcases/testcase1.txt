@@ -1,6 +1,6 @@
 lw 1 0 six
 lw 2 0 ten
-lw 3 o four
+lw 3 0 four
 lw 4 0 one
 add 5 4 2
 add 6 5 1
